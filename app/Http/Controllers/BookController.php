@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Book;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class BookController extends Controller
 {
     public function index()
     {
-        $books = DB::table('books')->get();
+        $books = Book::with('author')->get()->makeHidden('author_id');
         return response()->json($books);
     }
     public function show($id)
     {
-        $book = DB::table('books')->where('id', $id)->first();
+        $book = Book::with('author')->findOrFail($id)->makeHidden('author_id');
         if ($book) {
         return response()->json($book);
             } else {
@@ -25,40 +25,38 @@ class BookController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-                    'title' => 'required|max:255',
-                    'author' => 'required|max:255',
-                    'description' => 'nullable',
-                    ]);
-        DB::table('books')->insert([
-                    'title' => $data['title'],
-                    'author' => $data['author'],
-                    'description' => $data['description'],
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                        ]);
-        return response()->json(['message' => 'Book has been created'], 201);
-    }
-    public function update(Request $request, $id)
-    {
-        $validatedData = $request->validate([
             'title' => 'required|max:255',
-            'author' => 'required|max:255',
+            'author_id' => 'required|exists:authors,id',
             'description' => 'nullable',
         ]);
 
-        $book = DB::table('books')->where('id', $id)->first();
+
+        Book::create([
+            'title' => $data['title'],
+            'description' => $data['description'],
+            'author_id' => $data['author_id'],
+        ]);
+
+        return response()->json(['message' => 'Book and author created successfully'], 201);
+    }
+    public function update(Request $request, $id)
+    {
+       $data = $request->validate([
+            'title' => 'required|max:255',
+            'author_id' => 'required|exists:authors,id',
+            'description' => 'nullable',
+        ]);
+
+        $book = Book::findOrFail($id);
 
         if ($book) {
-            DB::table('books')
-                ->where('id', $id)
-                ->update([
-                    'title' => $validatedData['title'],
-                    'author' => $validatedData['author'],
-                    'description' => $validatedData['description'],
-                    'updated_at' => now(),
-                ]);
+            $book->update([
+                'title' => $data['title'],
+                'author_id' => $data['author_id'],
+                'description' => $data['description'],
+            ]);
 
-            return response()->json(['message' => 'Books has been updated']);
+            return response()->json(['message' => 'Book updated successfully', 'book' => $book]);
         } else {
             return response()->json(['message' => 'Book not found'], 404);
         }
@@ -66,10 +64,10 @@ class BookController extends Controller
 
     public function destroy($id)
     {
-        $book = DB::table('books')->where('id', $id)->first();
+        $book = Book::findOrFail($id);
 
         if ($book) {
-            DB::table('books')->where('id', $id)->delete();
+            $book->delete();
             return response()->json(['message' => 'Book has been deleted']);
         } else {
             return response()->json(['message' => 'Book not found'], 404);
