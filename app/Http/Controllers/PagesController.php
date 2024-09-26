@@ -36,7 +36,7 @@ class PagesController extends Controller
     }
     public function showSpecialPage()
     {
-            return view('special-page');
+       return view('special-page');
     }
 }
 
