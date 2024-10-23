@@ -2,30 +2,29 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Routing\Route;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\Auth;
 
 class PagesController extends Controller
 {
-    public function main() {
+    public function main()
+    {
         return view('main');
     }
-    public function services() {
+    public function services()
+    {
         return view('services');
     }
-    // public function service(string $id): View
-    // {
-    //     return view('service', ['id' => $id]);
-    // }
-    public function about() {
+    public function about()
+    {
         return view('about');
     }
-    public function contacts() {
+    public function contacts()
+    {
         return view('contacts');
     }
-    public function profile() {
-        return view('profile');
+    public function profile()
+    {
+        $user = Auth::user();
+        return view('profile', compact('user'));
     }
 }
-

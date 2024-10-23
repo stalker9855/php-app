@@ -16,10 +16,10 @@ class BookController extends Controller
     {
         $book = Book::with('author')->findOrFail($id)->makeHidden('author_id');
         if ($book) {
-        return response()->json($book);
-            } else {
-        return response()->json(['message' => 'Book not found'], 404);
-            }
+            return response()->json($book);
+        } else {
+            return response()->json(['message' => 'Book not found'], 404);
+        }
     }
 
     public function store(Request $request)
@@ -41,7 +41,7 @@ class BookController extends Controller
     }
     public function update(Request $request, $id)
     {
-       $data = $request->validate([
+        $data = $request->validate([
             'title' => 'required|max:255',
             'author_id' => 'required|exists:authors,id',
             'description' => 'nullable',
